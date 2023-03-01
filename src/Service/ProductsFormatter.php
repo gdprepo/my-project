@@ -2,32 +2,8 @@
 
 namespace App\Service;
 
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class Products
+class ProductsFormatter
 {
-    /**
-     * @return true|false
-     */
-    public function renderProducts(OutputInterface $output, array $data): bool
-    {
-        $table = new Table($output);
-        $table
-            ->setHeaders(["Sku", "Status", "Price", "Description", "Created At", "Slug"])
-            ->setRows($data)
-        ;
-
-        try {
-            $table->render();
-        } catch (\Exception $e) {
-            print($e->getMessage());
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * @return array
      */

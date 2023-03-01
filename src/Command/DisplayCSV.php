@@ -7,8 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\DateTime;
-use App\Service\ReadCsv;
-use App\Service\Products;
+use App\Service\DisplayCSVService;
 use Monolog\DateTimeImmutable;
 
 class DisplayCSV extends Command
@@ -16,9 +15,8 @@ class DisplayCSV extends Command
     protected static $defaultName = 'app:display-csv';
 
     public function __construct(
-        private $projectDir, 
-        private ReadCsv $readProductCsv,
-        private Products $products,
+        private $projectDir,  
+        private DisplayCSVService $displayCSVService
     ) {
         parent::__construct();
     }
@@ -35,23 +33,12 @@ class DisplayCSV extends Command
         $inputFile = $input->getArgument('file'); 
         $json = $input->getArgument('json'); 
 
-        // Convert csv file into array
-        $array = $this->readProductCsv->decodeCsv($this->projectDir . $inputFile);
-        // $array = $this->decodeCsv($inputFile);
-
-        if ($array == false) {
-            return Command::INVALID;
+        try {
+            $this->displayCSVService->displayCsv($this->projectDir . $inputFile, $json);
+         } catch (\Exception $e) {
+            $output->writeLn($e->getMessage());
+            return  Command::INVALID;
         }
-
-        // Get  the values for set the rows
-        $data = $this->products->formatRows($array);
-
-        // Create and return the result table
-        if ($json === "json") {
-            echo json_encode($data);
-            return Command::SUCCESS;
-        }
-
-        return $this->products->renderProducts($output, $data) ? Command::SUCCESS : Command::INVALID;
+        return Command::SUCCESS;
     }
 }
